@@ -14,7 +14,8 @@ async function getBridge(): Promise<Bridge> {
 
 async function main() {
   const bridge = await getBridge()
-  console.log(bridge)
+  const lights = await bridge.Light.all()
+  console.log(lights)
 }
 
 void main()
