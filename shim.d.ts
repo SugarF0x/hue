@@ -1,6 +1,7 @@
 declare namespace NodeJS {
   export interface ProcessEnv {
-    MY_VARIABLE_1: string;
-    MY_OTHER_VARIABLE: string;
+    HUE_USER: string
+    HUE_BRIDGE: string
+    HUE_IP?: string
   }
 }
