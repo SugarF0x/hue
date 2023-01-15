@@ -4,6 +4,7 @@ import * as child_process from "child_process"
 import * as fs from "fs"
 dotenv.config()
 
+const { LightState, Room } = model
 const { HUE_BRIDGE, HUE_USER } = process.env
 
 function getIpCache() {
@@ -47,12 +48,14 @@ async function main() {
 
   const livingRoom = (await api.groups.getGroupByName('Living room'))[0]
   if (!livingRoom) process.exit(1)
-  if (!(livingRoom instanceof model.Room)) process.exit(1)
+  if (!(livingRoom instanceof Room)) process.exit(1)
 
-  const state = new model.LightState().off()
+  const onState = new LightState().on()
+  const offState = new LightState().off()
 
   for (const id of livingRoom.lights) {
-    await api.lights.setLightState(id, state)
+    await api.lights.setLightState(id, offState)
+    setTimeout(() => { void api.lights.setLightState(id, onState) }, 1500)
     await delay(500)
   }
 }
