@@ -1,15 +1,15 @@
-import { Bridge, Hue } from 'hue'
+import { discovery, api as rawApi, model } from 'node-hue-api'
 import dotenv from 'dotenv'
-
 dotenv.config()
+
 const { HUE_BRIDGE, HUE_USER } = process.env
 
-async function getBridge(): Promise<Bridge> {
-  const hue = new Hue(HUE_BRIDGE, HUE_USER)
+async function getApi() {
+  const results = await discovery.mdnsSearch(500)
+  const ip = results.find(bridge => bridge.model.serial === HUE_BRIDGE).ipaddress ?? null
+  if (!ip) process.exit(1)
 
-  return new Promise(resolve => {
-    hue.on('ready', resolve)
-  })
+  return await rawApi.createLocal(ip).connect(HUE_USER)
 }
 
 async function delay(ms: number) {
@@ -17,22 +17,17 @@ async function delay(ms: number) {
 }
 
 async function main() {
-  const bridge = await getBridge()
-  const groups = await bridge.Group.all()
-  const livingRoomLightIds = groups.find(group => group.name.toLowerCase().includes('living'))?.lights ?? []
-  const allLights = await bridge.Light.all()
-  const lights = allLights.filter(light => livingRoomLightIds.includes(light.id))
+  const api = await getApi()
 
-  console.log(lights)
+  const livingRoom = (await api.groups.getGroupByName('Living room'))[0]
+  if (!livingRoom) process.exit(1)
+  if (!(livingRoom instanceof model.Room)) process.exit(1)
 
-  for (const light of lights) {
-    await light.on()
-    await delay(500)
-  }
+  const state = new model.LightState().off()
 
-  for (const light of lights) {
-    await light.off()
-    await delay(500)
+  for (const id of livingRoom.lights) {
+    await api.lights.setLightState(id, state)
+    await delay(250)
   }
 }
 

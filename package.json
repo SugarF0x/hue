@@ -9,7 +9,7 @@
     "dev": "nodemon src/index.ts"
   },
   "dependencies": {
-    "hue": "^0.2.5"
+    "node-hue-api": "^5.0.0-beta.15"
   },
   "devDependencies": {
     "@types/node": "^18.11.18",
