@@ -30,7 +30,6 @@ async function getApi() {
   getIpCache()
 
   let ip = process.env.HUE_IP
-  console.log({ ip })
 
   try {
     return await rawApi.createLocal(ip).connect(HUE_USER)
